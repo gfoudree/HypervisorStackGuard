@@ -12,3 +12,9 @@
 ## 16-bit kernel
 - `cd simple_kernel && make && make run`
 - The hypercall should be logged in the VMM's `dmesg`
+
+# Troubleshooting
+
+`mount: /vagrant: unknown filesystem type 'vboxsf'.``
+  - Likely because your VirtualBox Guest Additions are out of date. See this article for more details: https://discoposse.com/2016/05/23/autoupdating-virtualbox-guest-additions-with-vagrant-vbguest/
+  - Try running `vagrant plugin install vagrant-vbguest` followed by `vagrant up`
