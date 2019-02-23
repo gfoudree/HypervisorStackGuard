@@ -2,6 +2,9 @@ org 0x7C00                      ; BIOS loads our programm at this address
 bits 16                         ; We're working at 16-bit mode here
 
 start:
+	mov ax, 11		; Our Hypercall #
+	vmcall			; Call VMM
+
 	cli                     ; Disable the interrupts
 	mov si, msg             ; SI now points to our message
 	mov ah, 0x0E            ; Indicate BIOS we're going to print chars
