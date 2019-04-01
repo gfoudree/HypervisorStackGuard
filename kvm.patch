@@ -1,6 +1,6 @@
---- linux-4.19.24/arch/x86/kvm/x86.c	2019-02-20 03:25:50.000000000 -0600
-+++ linux-4.19.24/arch/x86/kvm/x86.c	2019-02-23 02:36:30.607936416 -0600
-@@ -6878,6 +6878,12 @@
+--- source/linux-4.19.24/arch/x86/kvm/x86.c	2019-02-20 03:25:50.000000000 -0600
++++ linux-4.19.24/arch/x86/kvm/x86.c	2019-04-01 16:23:09.829266805 -0500
+@@ -6878,6 +6878,35 @@
  	case KVM_HC_SEND_IPI:
  		ret = kvm_pv_send_ipi(vcpu->kvm, a0, a1, a2, a3, op_64_bit);
  		break;
@@ -9,16 +9,39 @@
 +		unsigned long rip = kvm_register_read(vcpu, VCPU_REGS_RIP);
 +		unsigned long rsp = kvm_register_read(vcpu, VCPU_REGS_RSP);
 +		printk(KERN_INFO "called from RIP=%lx RSP=%lx\n", rip, rsp);
++		
++		struct kvm_vcpu_arch *vcpu_arch = &vcpu->arch;
++		struct kvm_mmu *mmu = &vcpu_arch->mmu;
++		unsigned long cr3 = mmu->get_cr3(vcpu);
++
++		printk(KERN_INFO "CR3=%lu\nCode Dump:\n", cr3);
++
++		unsigned char buf[0x20] = {0};
++
++		kvm_vcpu_read_guest(vcpu, 0x7c00, buf, 0x20);
++
++		int i;
++		for (i = 0; i < 0x20; i = i+8) {
++			printk("%02X %02X %02X %02X %02X %02X %02X %02X", buf[i], buf[i+1], buf[i+2], buf[i+3], buf[i+4], buf[i+5], buf[i+6], buf[i+7]);
++		}
++		printk(KERN_INFO "\nStack Dump:\n");
++
++		kvm_vcpu_read_guest(vcpu, rsp, buf, 0x20);
++		for (i = 0; i < 0x20; i = i+8) {
++                        printk("%02X %02X %02X %02X %02X %02X %02X %02X", buf[i], buf[i+1], buf[i+2], buf[i+3], buf[i+4], buf[i+5], buf[i+6], buf[i+7]);
++                }
++		printk(KERN_INFO "\n");
++
 +		break;
  	default:
  		ret = -KVM_ENOSYS;
  		break;
---- linux-4.19.24/include/uapi/linux/kvm_para.h	2019-02-20 03:25:50.000000000 -0600
+--- source/linux-4.19.24/include/uapi/linux/kvm_para.h	2019-02-20 03:25:50.000000000 -0600
 +++ linux-4.19.24/include/uapi/linux/kvm_para.h	2019-02-22 20:31:28.051501699 -0600
 @@ -29,6 +29,7 @@
  #define KVM_HC_CLOCK_PAIRING		9
  #define KVM_HC_SEND_IPI		10
-
+ 
 +#define KVM_HC_TEST_HYPERCALL 11
  /*
   * hypercalls use architecture specific

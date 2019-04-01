@@ -2,8 +2,9 @@ org 0x7C00                      ; BIOS loads our programm at this address
 bits 16                         ; We're working at 16-bit mode here
 
 start:
-	mov ax, 11		; Our Hypercall #
-	vmcall			; Call VMM
+	mov ax, 11
+	push 0xaabb
+	vmcall
 
 	cli                     ; Disable the interrupts
 	mov si, msg             ; SI now points to our message
@@ -14,8 +15,6 @@ start:
 	int 0x10                ; Otherwise, call interrupt for printing the char
 	jmp .loop               ; Next iteration of the loop
 
-	mov ax, 11		; Do hypercall to our KVM handler
-	vmcall
 
 halt:	hlt                     ; CPU command to halt the execution
 msg:	db "Hello, World!", 0   ; Our actual message to print
