@@ -30,22 +30,24 @@ namespace {
           BasicBlock::iterator IP = B.getFirstInsertionPt(); //Start at begining of basic block
           IRBuilder<> IRB(&(*IP));
 
-          Value * args[] = {ConstantInt::get(IntegerType::get(Ctx, 64), 3)}; //Pass a constant of 3
+          //Value * args[] = {ConstantInt::get(IntegerType::get(Ctx, 64), 3)}; //Pass a constant of 3
 
           FunctionType *fType = FunctionType::get(Type::getVoidTy(Ctx), false);
           InlineAsm *IA_enter = InlineAsm::get(fType, "movq $$0xb, %rax; vmcall", "", true, false, InlineAsm::AsmDialect::AD_ATT);
-          IRB.CreateCall(IA_enter, NULL);
+          IRB.CreateCall(IA_enter, NULL); //Insert in vmcall at begining of function
 
-	
+
           for (auto &I : B) {
-		if (auto *op = dyn_cast<ReturnInst>(&I)) {
-			IRBuilder<> builder(op);
-			InlineAsm *IA_exit = InlineAsm::get(fType, "movq $$0xc, %rax; vmcall", "", true, false, InlineAsm::AsmDialect::AD_ATT);
+        		if (auto *op = dyn_cast<ReturnInst>(&I)) {
+        			std::cout << I.getOpcodeName() << std::endl;
+        			IRBuilder<> builder(op);
+        			InlineAsm *IA_exit = InlineAsm::get(fType, "movq $$0xc, %rax; vmcall", "", true, false, InlineAsm::AsmDialect::AD_ATT);
 
-              		builder.SetInsertPoint(&B, builder.GetInsertPoint());
-			builder.CreateCall(IA_exit, NULL);
-		}
-	  }
+        			//builder.SetInsertPoint(&B, builder.GetInsertPoint());
+        			builder.SetInsertPoint(&I);
+        			builder.CreateCall(IA_exit, NULL); //Insert in vmcall at end of function
+        		}
+        	}
 
           return true;
           /*

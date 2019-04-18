@@ -1,4 +1,8 @@
 #include <stdio.h>
-int main(int argc, const char** argv) {
+int foo(int c) {
+	return c+5;
+}
 
+int main(int argc, const char** argv) {
+	return foo(3);
 }

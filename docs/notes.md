@@ -6,8 +6,15 @@
 
 ## Functions of Interest
 - `kvm_register_read()`,`kvm_register_write()`: R/W registers
+- `kvm_vcpu_read_guest()`: Read guest memory
 
 ## How to invoke hypercall
+`$hypercall_no`: 0xB = function enter, 0xA = function exit
+
 `mov $hypercall_no, %eax`
 
 `vmcall`
+
+
+## Determining return address
+On function enter and exit, return address is going to be at `%(rbp+8)`

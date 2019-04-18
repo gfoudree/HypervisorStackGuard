@@ -7,6 +7,9 @@
 - Run `patch -p0 < kvm.patch` from outside of the kernel folder
 - Build and install Kernel
 
+## Reloading KVM kernel module
+`make modules SUBDIRS=arch/x86/kvm  && make modules_install SUBDIRS=arch/x86/kvm && rmmod kvm_intel && rmmod kvm && modprobe kvm && modprobe kvm_intel`
+
 # Running
 
 ## 16-bit kernel
