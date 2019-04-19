@@ -9,9 +9,11 @@
 - `kvm_vcpu_read_guest()`: Read guest memory
 
 ## How to invoke hypercall
-`$hypercall_no`: 0xB = function enter, 0xA = function exit
+`$hypercall_no`: 0x1 = function enter, 0x2 = function exit
 
-`mov $hypercall_no, %eax`
+`mov $0xB, %eax`
+
+`mov $hypercall_no, %ebx`
 
 `vmcall`
 
