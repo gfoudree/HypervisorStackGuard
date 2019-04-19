@@ -1,5 +1,5 @@
 --- source/linux-5.0.8/arch/x86/kvm/x86.c	2019-04-17 01:39:54.000000000 -0500
-+++ linux-5.0.8/arch/x86/kvm/x86.c	2019-04-19 16:35:30.775610524 -0500
++++ linux-5.0.8/arch/x86/kvm/x86.c	2019-04-19 17:00:43.036168664 -0500
 @@ -7116,6 +7116,7 @@
  		goto out;
  	}
@@ -8,7 +8,7 @@
  	switch (nr) {
  	case KVM_HC_VAPIC_POLL_IRQ:
  		ret = 0;
-@@ -7132,6 +7133,46 @@
+@@ -7132,6 +7133,54 @@
  	case KVM_HC_SEND_IPI:
  		ret = kvm_pv_send_ipi(vcpu->kvm, a0, a1, a2, a3, op_64_bit);
  		break;
@@ -31,6 +31,14 @@
 +		}
 +
 +		printk(KERN_INFO "Called from RIP=0x%lx RSP=0x%lx RBP=0x%lx\n", rip, rsp, rbp);
++
++		//Compute return address
++		unsigned char ret_addr_bytes[0x4] = {0};
++		kvm_vcpu_read_guest(vcpu, rbp+4, ret_addr_bytes, 0x4);
++		unsigned long ret_addr = (ret_addr_bytes[3] << 24) | (ret_addr_bytes[2] << 16) |
++			(ret_addr_bytes[1] << 8) | ret_addr_bytes[0];
++		printk(KERN_INFO "Return address: 0x%lx\n", ret_addr);
++
 +		struct kvm_vcpu_arch *vcpu_arch = &vcpu->arch;
 +		struct kvm_mmu *mmu = vcpu_arch->mmu;
 +

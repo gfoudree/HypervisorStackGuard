@@ -91,12 +91,25 @@ void terminal_writestring(const char * data) {
   terminal_write(data, strlen(data));
 }
 
+void prot_function_test(void) {
+	asm volatile ("movl $0xb, %eax \n\t"
+	    "movl $0x1, %ebx \n\t"
+	    "vmcall");
+
+	int i = 3;
+	i += 7;
+
+	asm volatile ("movl $0xb, %eax \n\t"
+	     "movl $0x2, %ebx \n\t"
+	     "vmcall");
+}
+
 void kernel_main(void) {
   /* Initialize terminal interface */
   terminal_initialize();
 
+  prot_function_test();
+
   /* Newline support is left as an exercise. */
   terminal_writestring("Hello, kernel World!\n");
-  __asm__("movl $0xb, %eax");
-  __asm__("vmcall");
 }
