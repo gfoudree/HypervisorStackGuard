@@ -15,12 +15,12 @@ start:
 
 fn:
 	mov ax, 0xB
+	mov bx, 0x1
 	vmcall
 
-	mov cx, 0xff
-	inc cx
 
-	mov ax, 0xA
+	mov ax, 0xB
+	mov bx, 0x2
 	vmcall
 	nop
 	ret

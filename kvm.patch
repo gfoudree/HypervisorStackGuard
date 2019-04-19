@@ -1,5 +1,5 @@
 --- source/linux-5.0.8/arch/x86/kvm/x86.c	2019-04-17 01:39:54.000000000 -0500
-+++ linux-5.0.8/arch/x86/kvm/x86.c	2019-04-18 15:14:37.445830429 -0500
++++ linux-5.0.8/arch/x86/kvm/x86.c	2019-04-19 16:35:30.775610524 -0500
 @@ -7116,6 +7116,7 @@
  		goto out;
  	}
@@ -8,7 +8,7 @@
  	switch (nr) {
  	case KVM_HC_VAPIC_POLL_IRQ:
  		ret = 0;
-@@ -7132,6 +7133,32 @@
+@@ -7132,6 +7133,46 @@
  	case KVM_HC_SEND_IPI:
  		ret = kvm_pv_send_ipi(vcpu->kvm, a0, a1, a2, a3, op_64_bit);
  		break;
@@ -16,15 +16,28 @@
 +	case KVM_HC_STACKGUARD:
 +		printk(KERN_INFO "Stackguard hypercall invoked!\n");
 +		unsigned long rip = kvm_register_read(vcpu, VCPU_REGS_RIP);
++		unsigned long rbx = kvm_register_read(vcpu, VCPU_REGS_RBX);
 +		unsigned long rsp = kvm_register_read(vcpu, VCPU_REGS_RSP);
 +		unsigned long rbp = kvm_register_read(vcpu, VCPU_REGS_RBP);
-+		printk(KERN_INFO "Called from RIP=%lx RSP=%lx RBP=%lx\n", rip, rsp, rbp);
++
++		if (rbx == 0x1) {
++			printk(KERN_INFO "Function Enter\n");
++		}
++		else if (rbx == 0x2) {
++			printk(KERN_INFO "Function Exit\n");
++		}
++		else {
++			printk(KERN_INFO "Unknown hypercall param 0x%lx\n", rbx);
++		}
++
++		printk(KERN_INFO "Called from RIP=0x%lx RSP=0x%lx RBP=0x%lx\n", rip, rsp, rbp);
 +		struct kvm_vcpu_arch *vcpu_arch = &vcpu->arch;
 +		struct kvm_mmu *mmu = vcpu_arch->mmu;
 +
 +		unsigned char buf[0x20] = {0};
-+		kvm_vcpu_read_guest(vcpu, 0x7c00, buf, 0x20);
++		kvm_vcpu_read_guest(vcpu, rip, buf, 0x20);
 +		
++		printk(KERN_INFO "\nRIP Code Dump:\n");
 +		int i;
 +		for (i = 0; i < 0x20; i = i+8) {
 +			printk("%02X %02X %02X %02X %02X %02X %02X %02X", buf[i], buf[i+1], buf[i+2], buf[i+3], buf[i+4], buf[i+5], buf[i+6], buf[i+7]);
@@ -36,6 +49,7 @@
 +			printk("%02X %02X %02X %02X %02X %02X %02X %02X", buf[i], buf[i+1], buf[i+2], buf[i+3], buf[i+4], buf[i+5], buf[i+6], buf[i+7]);
 +		}
 +		printk(KERN_INFO "\n");
++		ret = 0;
 +		break;
 +
  	default:
