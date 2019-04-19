@@ -18,3 +18,8 @@
 
 ## Determining return address
 On function enter and exit, return address is going to be at `%(rbp+8)`
+
+
+## Measuring performance
+
+`perf kvm stat live`
