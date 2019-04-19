@@ -1,10 +1,8 @@
 org 0x7C00                      ; BIOS loads our programm at this address
 bits 16                         ; We're working at 16-bit mode here
-
+	
 start:
-	mov ax, 11
-	push 0xaabb
-	vmcall
+	call fn
 
 	cli                     ; Disable the interrupts
 	mov si, msg             ; SI now points to our message
@@ -14,6 +12,18 @@ start:
 	jz halt                 ; Jump to halt if the end
 	int 0x10                ; Otherwise, call interrupt for printing the char
 	jmp .loop               ; Next iteration of the loop
+
+fn:
+	mov ax, 0xB
+	vmcall
+
+	mov cx, 0xff
+	inc cx
+
+	mov ax, 0xA
+	vmcall
+	nop
+	ret
 
 
 halt:	hlt                     ; CPU command to halt the execution
