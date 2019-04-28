@@ -34,7 +34,7 @@ static inline uint16_t vga_entry(unsigned char uc, uint8_t color) {
   return (uint16_t) uc | (uint16_t) color << 8;
 }
 
-__attribute__((annotate("StackGuard"))) size_t strlen(const char * str) {
+size_t strlen(const char * str) {
   size_t len = 0;
   while (str[len])
     len++;
@@ -87,29 +87,47 @@ void terminal_write(const char * data, size_t size) {
     terminal_putchar(data[i]);
 }
 
-void terminal_writestring(const char * data) {
+__attribute__((annotate("StackGuard"))) void terminal_writestring(const char * data) {
   terminal_write(data, strlen(data));
 }
 
-void prot_function_test(void) {
+static inline void prot_function_test(void) {
+#ifdef BENCHMARK
 	asm volatile ("movl $0xb, %eax \n\t"
 	    "movl $0x1, %ebx \n\t"
 	    "vmcall");
-
+#endif
 	int i = 3;
 	i += 7;
-
+#ifdef BENCHMARK
 	asm volatile ("movl $0xb, %eax \n\t"
 	     "movl $0x2, %ebx \n\t"
 	     "vmcall");
+#endif
+}
+
+unsigned long get_ticks(void) {
+	unsigned long hi, lo;
+
+	asm volatile ("rdtsc" : "=a" (lo), "=d" (hi));
+	return lo;
 }
 
 void kernel_main(void) {
   /* Initialize terminal interface */
   terminal_initialize();
 
-  prot_function_test();
+  //prot_function_test();
 
   /* Newline support is left as an exercise. */
   terminal_writestring("Hello, kernel World!\n");
+
+  unsigned long time = get_ticks();
+  prot_function_test();
+
+  unsigned long total = get_ticks() - time;
+
+  asm volatile ("mov %0, %%edx" : :"r"(total));
+  asm volatile ("cli\n"
+		  "hlt");
 }

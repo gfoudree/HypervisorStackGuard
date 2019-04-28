@@ -1,5 +1,5 @@
 all:
-	cd llvm_pass/build; rm -rf *; cmake ..; make; cd -
+	mkdir llvm_pass/build; cd llvm_pass/build; rm -rf *; cmake ..; make; cd -
 
 	i686-elf-as boot.s -o boot.o
 	i686-elf-gcc -c kernel.c -o kernel_plain.o -std=gnu99 -ffreestanding -O0 -Wall -Wextra
