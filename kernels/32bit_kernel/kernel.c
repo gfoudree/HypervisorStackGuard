@@ -109,7 +109,9 @@ static inline void prot_function_test(void) {
 unsigned long get_ticks(void) {
 	unsigned long hi, lo;
 
-	asm volatile ("rdtsc" : "=a" (lo), "=d" (hi));
+	asm volatile ("mfence\n"
+			"lfence\n"
+			"rdtsc" : "=a" (lo), "=d" (hi));
 	return lo;
 }
 

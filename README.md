@@ -22,5 +22,3 @@
   - Likely because your VirtualBox Guest Additions are out of date. See this article for more details: https://discoposse.com/2016/05/23/autoupdating-virtualbox-guest-additions-with-vagrant-vbguest/
   - Try running `vagrant plugin install vagrant-vbguest` followed by `vagrant up`
 
-
-make -C . M=arch/x86/kvm && make modules_install M=arch/x86/kvm
